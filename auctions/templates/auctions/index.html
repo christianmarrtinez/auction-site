@@ -1,7 +1,19 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Active Listings</h2>
+<h2>Active Listings</h2>
 
-    TODO
+{% if listings %}
+    <ul class="list-group">
+        {% for listing in listings %}
+            <li class="list-group-item">
+                <a href="{% url 'listing' listing.id %}">{{ listing.title }}</a>
+                <p>{{ listing.description }}</p>
+                <p><strong>Current Price:</strong> ${{ listing.current_price }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No active listings available.</p>
+{% endif %}
 {% endblock %}

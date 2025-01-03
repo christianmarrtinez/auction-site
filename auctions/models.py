@@ -11,7 +11,7 @@ class AuctionListing(models.Model):
         ('Toys', 'Toys'),
         ('Electronics', 'Electronics'),
         ('Home', 'Home'),
-        # Add more categories as needed
+        
     ]
 
     title = models.CharField(max_length=100)

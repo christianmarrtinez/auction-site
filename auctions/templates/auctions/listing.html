@@ -1,0 +1,14 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+<h2>{{ listing.title }}</h2>
+
+{% if listing.image %}
+<img src="{{ listing.image }}" alt="{{ listing.title }}" style="max-width: 100%;">
+{% endif %}
+
+<p><strong>Description:</strong> {{ listing.description }}</p>
+<p><strong>Current Price:</strong> ${{ listing.current_price }}</p>
+
+<a href="{% url 'index' %}" class="btn btn-primary">Back to Active Listings</a>
+{% endblock %}
