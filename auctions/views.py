@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
@@ -6,7 +7,7 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .forms import AuctionListingForm
 
-from .models import User, AuctionListing
+from .models import User, AuctionListing, Watchlist
 
 
 def index(request):
@@ -88,7 +89,35 @@ def active_listings(request):
 
 def listing(request, listing_id):
     listing = get_object_or_404(AuctionListing, id=listing_id)
-    
-    return render(request, "auctions/listing.html", {
-        "listing": listing
-    })
+
+    # Get the list of users in the watchlist for this listing
+    listing_watchlist_users = listing.watchlist_entries.values_list('user', flat=True)
+   # listing_watchlist_users = listing.watchlist_entries.values_list('user__id', flat=True)
+
+
+    context = {
+        'listing': listing,
+        'listing_watchlist_users': listing_watchlist_users,  # pass it to the template
+    }
+    return render(request, 'auctions/listing.html', context)
+
+@login_required
+def toggle_watchlist(request, listing_id):
+    listing = get_object_or_404(AuctionListing, id=listing_id)
+
+    action = request.POST.get('action')
+    if action == "add":
+        # Add to watchlist if not already present
+        if not Watchlist.objects.filter(user=request.user, listing=listing).exists():
+            Watchlist.objects.create(user=request.user, listing=listing)
+            messages.success(request, f'"{listing.title}" added to your watchlist.')
+    elif action == "remove":
+        # Remove from watchlist if present
+        Watchlist.objects.filter(user=request.user, listing=listing).delete()
+        messages.success(request, f'"{listing.title}" removed from your watchlist.')
+
+     # Get the updated list of users in the watchlist for this listing
+    listing_watchlist_users = listing.watchlist_entries.values_list('user', flat=True)
+  
+    return redirect("listing", listing_id=listing.id)
+

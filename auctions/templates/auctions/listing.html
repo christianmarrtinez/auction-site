@@ -10,5 +10,33 @@
 <p><strong>Description:</strong> {{ listing.description }}</p>
 <p><strong>Current Price:</strong> ${{ listing.current_price }}</p>
 
+{% if user.is_authenticated %}
+    <form action="{% url 'toggle_watchlist' listing.id %}" method="post" style="display: inline-block;">
+        {% csrf_token %}
+        <button 
+            type="submit" 
+            name="action" 
+            value="add" 
+            class="btn btn-primary"
+            {% if user.id in listing_watchlist_users %}disabled{% endif %}>
+            Add to Watchlist
+        </button>
+    </form>
+    
+    <form action="{% url 'toggle_watchlist' listing.id %}" method="post" style="display: inline-block; margin-left: 10px;">
+        {% csrf_token %}
+        <button 
+            type="submit" 
+            name="action" 
+            value="remove" 
+            class="btn btn-danger"
+            {% if user.id not in listing_watchlist_users %}disabled{% endif %}>
+            Remove from Watchlist
+        </button>
+    </form>
+{% endif %}
+
+
+
 <a href="{% url 'index' %}" class="btn btn-primary">Back to Active Listings</a>
 {% endblock %}
