@@ -1,5 +1,12 @@
 {% extends "auctions/layout.html" %}
 
+{% load static %}
+
+{% block scripts %}
+<script src="{% static 'auctions/js/bid_input.js' %}"></script>
+{% endblock %}
+
+
 {% block body %}
 <h2>{{ listing.title }}</h2>
 
@@ -14,7 +21,14 @@
     <h3>Place a Bid</h3>
     <form method="POST">
         {% csrf_token %}
-        {{ form.as_p }}
+        <input 
+            type="number" 
+            name="amount" 
+            class="form-control bid-input" 
+            placeholder="00.00" 
+            step="0.01" 
+            min="0.01"
+            required>
         <button type="submit" class="btn btn-primary">Place Bid</button>
     </form>
     {% if messages %}
