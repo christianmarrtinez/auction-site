@@ -50,4 +50,4 @@ class Watchlist(models.Model):
     listing = models.ForeignKey(AuctionListing, on_delete=models.CASCADE, related_name="watchlist_entries")
 
     class Meta:
-        unique_together = ('user', 'listing')  # Prevent duplicate entries
+        unique_together = ('user', 'listing') 

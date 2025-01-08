@@ -1,5 +1,5 @@
 from django import forms
-from .models import AuctionListing
+from .models import AuctionListing, Bid
 
 class AuctionListingForm(forms.ModelForm):
     class Meta:
@@ -11,4 +11,15 @@ class AuctionListingForm(forms.ModelForm):
             'starting_bid': forms.NumberInput(attrs={'class': 'form-control'}),
             'image_url': forms.URLInput(attrs={'class': 'form-control'}),
             'category': forms.Select(choices=AuctionListing.CATEGORY_CHOICES),
+        }
+
+class BidForm(forms.ModelForm):
+    class Meta:
+        model = Bid
+        fields = ['amount']
+        labels = {
+            'amount': 'Your Bid'
+        }
+        widgets = {
+            'amount': forms.NumberInput(attrs={'class': 'form-control'})
         }

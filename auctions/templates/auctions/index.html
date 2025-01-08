@@ -3,17 +3,18 @@
 {% block body %}
 <h2>Active Listings</h2>
 
-{% if listings %}
-    <ul class="list-group">
-        {% for listing in listings %}
-            <li class="list-group-item">
-                <a href="{% url 'listing' listing.id %}">{{ listing.title }}</a>
-                <p>{{ listing.description }}</p>
-                <p><strong>Current Price:</strong> ${{ listing.current_price }}</p>
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>No active listings available.</p>
-{% endif %}
+<div class="listings">
+    {% for entry in listings_with_prices %}
+        <div class="listing">
+            <h3><a href="{% url 'listing' entry.listing.id %}">{{ entry.listing.title }}</a></h3>
+            <p><strong>Description:</strong> {{ entry.listing.description }}</p>
+            <p><strong>Category:</strong> {{ entry.listing.category }}</p>
+            {% if entry.listing.image_url %}
+                <img src="{{ entry.listing.image_url }}" alt="{{ entry.listing.title }}" style="max-width: 200px;">
+            {% endif %}
+            <p><strong>Current Price:</strong> ${{ entry.current_price|floatformat:2 }}</p>
+        </div>
+        <hr>
+    {% endfor %}
+</div>
 {% endblock %}

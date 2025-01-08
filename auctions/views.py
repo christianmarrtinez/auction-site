@@ -5,17 +5,29 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from .forms import AuctionListingForm
+from .forms import AuctionListingForm, BidForm
+from django.db.models import Max
 
-from .models import User, AuctionListing, Watchlist
+from .models import User, AuctionListing, Watchlist, Bid
 
 
 def index(request):
     listings = AuctionListing.objects.filter(is_active=True)
 
-    return render(request, "auctions/index.html", {
-        "listings": listings
-    })
+    # Dynamically calculate current price for each listing
+    listings_with_prices = []
+    for listing in listings:
+        highest_bid = listing.bids.aggregate(Max('amount'))['amount__max']  # Get the highest bid amount
+        current_price = highest_bid if highest_bid else listing.starting_bid  # Use starting_bid if no bids
+        listings_with_prices.append({
+            'listing': listing,
+            'current_price': current_price,
+        })
+
+    context = {
+        'listings_with_prices': listings_with_prices,
+    }
+    return render(request, 'auctions/index.html', context)
 
 
 def login_view(request):
@@ -89,15 +101,50 @@ def active_listings(request):
 
 def listing(request, listing_id):
     listing = get_object_or_404(AuctionListing, id=listing_id)
+    bids = listing.bids.order_by('-amount')  # Get all bids for this listing, ordered by amount descending
+
+    current_price = bids.first().amount if bids.exists() else listing.starting_bid
+
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            messages.error(request, "You must be logged in to place a bid.")
+            return redirect('login')
+
+        form = BidForm(request.POST)
+        if form.is_valid():
+            bid_amount = form.cleaned_data['amount']
+
+            # Validate the bid
+            if bid_amount < listing.starting_bid:
+                messages.error(request, "Your bid must be at least the starting bid.")
+            elif bids.exists() and bid_amount <= bids.first().amount:
+                messages.error(request, "Your bid must be higher than the current highest bid.")
+            else:
+                # Save the bid
+                new_bid = form.save(commit=False)
+                new_bid.listing = listing
+                new_bid.bidder = request.user
+                new_bid.save()
+
+                # Update the current price of the listing
+                listing.current_price = bid_amount
+                listing.save()
+
+                messages.success(request, "Your bid was placed successfully.")
+                return redirect('listing', listing_id=listing_id)
+
+    else:
+        form = BidForm()
 
     # Get the list of users in the watchlist for this listing
     listing_watchlist_users = listing.watchlist_entries.values_list('user', flat=True)
-   # listing_watchlist_users = listing.watchlist_entries.values_list('user__id', flat=True)
-
 
     context = {
         'listing': listing,
-        'listing_watchlist_users': listing_watchlist_users,  # pass it to the template
+        'bids': bids,
+        'form': form,
+        'current_price': current_price,
+        'listing_watchlist_users': listing_watchlist_users,
     }
     return render(request, 'auctions/listing.html', context)
 
