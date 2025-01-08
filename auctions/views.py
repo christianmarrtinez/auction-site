@@ -7,6 +7,8 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .forms import AuctionListingForm, BidForm, CommentForm
 from django.db.models import Max
+from django.utils import timezone
+import pytz
 
 from .models import User, AuctionListing, Watchlist, Bid, Comment
 
@@ -104,6 +106,17 @@ def listing(request, listing_id):
     bids = listing.bids.order_by('-amount')  # Get all bids for this listing, ordered by amount descending
 
     current_price = bids.first().amount if bids.exists() else listing.starting_bid
+
+    # Get the time in the user's timezone (assuming user is logged in)
+    if request.user.is_authenticated:
+        user_timezone = pytz.timezone('US/Eastern')  # Defaulting to EST
+    else:
+        user_timezone = pytz.timezone('UTC')  # Use UTC for unauthenticated users
+
+    # Adjust the timestamps
+    comments = listing.comments.all().order_by('-timestamp')
+    for comment in comments:
+        comment.timestamp = comment.timestamp.astimezone(user_timezone)  # Convert timestamp to user's timezone
 
     winner = None
     if not listing.is_active and bids.exists():

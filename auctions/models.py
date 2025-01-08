@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
+from django.utils import timezone
+import pytz
 
 class User(AbstractUser):
     pass
@@ -41,6 +42,13 @@ class Comment(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.timestamp:  # If timestamp is not set yet (on creation)
+            # Convert the current time to EST before saving
+            eastern = pytz.timezone('US/Eastern')
+            self.timestamp = timezone.now().astimezone(eastern)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Comment by {self.author.username} on {self.listing.title}"
