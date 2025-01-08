@@ -5,10 +5,10 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from .forms import AuctionListingForm, BidForm
+from .forms import AuctionListingForm, BidForm, CommentForm
 from django.db.models import Max
 
-from .models import User, AuctionListing, Watchlist, Bid
+from .models import User, AuctionListing, Watchlist, Bid, Comment
 
 
 def index(request):
@@ -150,6 +150,15 @@ def listing(request, listing_id):
 
                 messages.success(request, "Your bid was placed successfully.")
                 return redirect('listing', listing_id=listing_id)
+            
+            # Handle comment submission
+        if 'comment' in request.POST:
+            comment_content = request.POST.get('comment_content')
+            if comment_content:
+                comment = Comment(listing=listing, author=request.user, content=comment_content)
+                comment.save()
+                messages.success(request, "Your comment was added.")
+                return redirect('listing', listing_id=listing.id)
 
     else:
         form = BidForm()
@@ -157,13 +166,17 @@ def listing(request, listing_id):
     # Get the list of users in the watchlist for this listing
     listing_watchlist_users = listing.watchlist_entries.values_list('user', flat=True)
 
+   # Get all comments for the listing
+    comments = listing.comments.all().order_by('-timestamp')  # Fetch comments ordered by timestamp
+
     context = {
         'listing': listing,
         'bids': bids,
         'form': form,
         'current_price': current_price,
         'listing_watchlist_users': listing_watchlist_users,
-        'winner': winner,  # Pass the winner to the template
+        'winner': winner,  
+        'comments': comments,  
     }
     return render(request, 'auctions/listing.html', context)
 
