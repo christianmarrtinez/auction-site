@@ -105,6 +105,24 @@ def listing(request, listing_id):
 
     current_price = bids.first().amount if bids.exists() else listing.starting_bid
 
+    winner = None
+    if not listing.is_active and bids.exists():
+        # Get the highest bid
+        winner_bid = bids.first()
+        if winner_bid:
+            winner = winner_bid.bidder  # The bidder who placed the highest bid
+
+
+    if request.method == 'POST':
+    # Handle placing a bid
+        if 'close_auction' in request.POST:
+            if request.user == listing.owner:
+                listing.is_active = False  # Close the auction
+                listing.save()
+                messages.success(request, "Auction has been closed.")
+                return redirect('listing', listing_id=listing.id)
+
+
     if request.method == 'POST':
         if not request.user.is_authenticated:
             messages.error(request, "You must be logged in to place a bid.")
@@ -145,6 +163,7 @@ def listing(request, listing_id):
         'form': form,
         'current_price': current_price,
         'listing_watchlist_users': listing_watchlist_users,
+        'winner': winner,  # Pass the winner to the template
     }
     return render(request, 'auctions/listing.html', context)
 
@@ -168,3 +187,27 @@ def toggle_watchlist(request, listing_id):
   
     return redirect("listing", listing_id=listing.id)
 
+@login_required
+def close_auction(request, listing_id):
+    # Get the auction listing object
+    auction = get_object_or_404(AuctionListing, id=listing_id)
+
+    # Check if the user is the creator of the auction
+    if auction.owner != request.user:
+        return redirect('auction_detail', listing_id=auction.id)
+
+    # Ensure the auction is still active before closing
+    if not auction.is_active:
+        return redirect('auction_detail', listing_id=auction.id)
+
+    # Mark the auction as closed
+    auction.is_active = False
+
+    # Find the highest bid
+    highest_bid = auction.bids.order_by('-amount').first()  # Get the highest bid
+    if highest_bid:
+        auction.current_price = highest_bid.amount
+        auction.save()
+
+    # Redirect to the auction's detail page
+    return redirect('auction_detail', listing_id=auction.id)

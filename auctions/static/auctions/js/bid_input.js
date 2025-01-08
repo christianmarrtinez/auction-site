@@ -17,8 +17,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         // Limit the length to something reasonable
-        if (value.length > 15) {
-            value = value.slice(0, 15);
+        if (value.length > 8) {
+            value = value.slice(0, 8);
         }
 
         // Set the value back to the input field

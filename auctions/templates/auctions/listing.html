@@ -77,5 +77,16 @@
     </button>
 </form>
 
+{% if winner %}
+    <h3>This auction is closed. The winner is {{ winner.username }} with a final bid of ${{ listing.current_price }}.</h3>
+{% endif %}
+
+{% if user == listing.owner and listing.is_active %}
+    <form method="POST" style="margin-top: 20px;">
+        {% csrf_token %}
+        <button type="submit" name="close_auction" value="1" class="btn btn-danger">Close Auction</button>
+    </form>
+{% endif %}
+
 <a href="{% url 'index' %}" class="btn btn-primary">Back to Active Listings</a>
 {% endblock %}
