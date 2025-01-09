@@ -237,3 +237,23 @@ def close_auction(request, listing_id):
 
     # Redirect to the auction's detail page
     return redirect('auction_detail', listing_id=auction.id)
+
+@login_required
+def watchlist(request):
+    # Get all listings in the user's watchlist
+    watchlist_items = Watchlist.objects.filter(user=request.user)
+    listings_with_prices = []
+
+    for item in watchlist_items:
+        listing = item.listing
+        highest_bid = listing.bids.aggregate(Max('amount'))['amount__max']
+        current_price = highest_bid if highest_bid else listing.starting_bid
+        listings_with_prices.append({
+            'listing': listing,
+            'current_price': current_price,
+        })
+
+    context = {
+        'listings_with_prices': listings_with_prices,
+    }
+    return render(request, 'auctions/watchlist.html', context)
