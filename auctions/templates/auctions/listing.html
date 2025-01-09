@@ -12,8 +12,9 @@
 <h2>{{ listing.title }}</h2>
 
 {% if listing.image %}
-<img src="{{ listing.image }}" alt="{{ listing.title }}" style="max-width: 100%;">
+  <img src="{{ listing.image.url }}" alt="{{ listing.title }}" style="max-width: 100%;">
 {% endif %}
+
 
 <p><strong>Description:</strong> {{ listing.description }}</p>
 <p><strong>Current Price:</strong> ${{ current_price }}</p>

@@ -85,7 +85,7 @@ def register(request):
 @login_required
 def create_listing(request):
     if request.method == "POST":
-        form = AuctionListingForm(request.POST)
+        form = AuctionListingForm(request.POST, request.FILES)  # Include request.FILES to handle file uploads
         if form.is_valid():
             listing = form.save(commit=False)
             listing.owner = request.user  
@@ -94,6 +94,7 @@ def create_listing(request):
     else:
         form = AuctionListingForm()
     return render(request, 'auctions/create_listing.html', {'form': form})
+
 
 def active_listings(request):
     listings = AuctionListing.objects.filter(is_active=True)
