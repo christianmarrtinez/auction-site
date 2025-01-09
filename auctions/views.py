@@ -119,11 +119,15 @@ def listing(request, listing_id):
         comment.timestamp = comment.timestamp.astimezone(user_timezone)  # Convert timestamp to user's timezone
 
     winner = None
+    is_user_winner = False
     if not listing.is_active and bids.exists():
         # Get the highest bid
         winner_bid = bids.first()
         if winner_bid:
             winner = winner_bid.bidder  # The bidder who placed the highest bid
+            # Check if the logged-in user is the winner
+            if request.user.is_authenticated and request.user == winner:
+                is_user_winner = True
 
 
     if request.method == 'POST':
@@ -188,7 +192,8 @@ def listing(request, listing_id):
         'form': form,
         'current_price': current_price,
         'listing_watchlist_users': listing_watchlist_users,
-        'winner': winner,  
+        'winner': winner,
+        'is_user_winner': is_user_winner,  
         'comments': comments,  
     }
     return render(request, 'auctions/listing.html', context)

@@ -103,8 +103,14 @@
     </button>
 </form>
 
-{% if winner %}
-    <h3>This auction is closed. The winner is {{ winner.username }} with a final bid of ${{ listing.current_price }}.</h3>
+{% if not listing.is_active %}
+    {% if is_user_winner %}
+        <h3>Congratulations! You have won this auction with a bid of ${{ current_price }}.</h3>
+    {% elif winner %}
+        <h3>This auction is closed. The winner is {{ winner.username }} with a final bid of ${{ current_price }}.</h3>
+    {% else %}
+        <h3>This auction is closed. No winning bid was placed.</h3>
+    {% endif %}
 {% endif %}
 
 {% if user == listing.owner and listing.is_active %}
