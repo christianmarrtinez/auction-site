@@ -10,7 +10,7 @@ from django.db.models import Max
 from django.utils import timezone
 import pytz
 
-from .models import User, AuctionListing, Watchlist, Bid, Comment
+from .models import User, AuctionListing, Watchlist, Bid, Comment, Category
 
 
 def index(request):
@@ -89,6 +89,8 @@ def create_listing(request):
         if form.is_valid():
             listing = form.save(commit=False)
             listing.owner = request.user  
+            if listing.category_id:
+                listing.category = listing.category_id.name
             listing.save()
             return redirect('index')  
     else:
@@ -263,3 +265,14 @@ def watchlist(request):
         'listings_with_prices': listings_with_prices,
     }
     return render(request, 'auctions/watchlist.html', context)
+def categories(request):
+    categories = Category.objects.all()
+    return render(request, 'auctions/categories.html', {'categories': categories})
+
+def category_listings(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+    listings = AuctionListing.objects.filter(category_id=category, is_active=True)
+    return render(request, 'auctions/category_listings.html', {
+        'category': category,
+        'listings': listings
+    })

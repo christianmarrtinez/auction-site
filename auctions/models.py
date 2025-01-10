@@ -6,6 +6,12 @@ import pytz
 class User(AbstractUser):
     pass
 
+class Category(models.Model):
+    name = models.CharField(max_length=64, unique=True)
+
+    def __str__(self):
+        return self.name
+
 class AuctionListing(models.Model):
     CATEGORY_CHOICES = [
         ('Fashion', 'Fashion'),
@@ -21,12 +27,19 @@ class AuctionListing(models.Model):
     current_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     image = models.ImageField(upload_to='listing_images/', blank=True, null=True)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, blank=True, null=True)
+    category_id = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="listings", blank=True, null=True)
     is_active = models.BooleanField(default=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="listings")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
+    
+    def save(self, *args, **kwargs):
+        # Automatically set the category_id based on the category field value
+        if self.category:
+            self.category_id = Category.objects.get(name=self.category)
+        super().save(*args, **kwargs)
 
 class Bid(models.Model):
     listing = models.ForeignKey(AuctionListing, on_delete=models.CASCADE, related_name="bids")
