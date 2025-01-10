@@ -276,3 +276,23 @@ def category_listings(request, category_id):
         'category': category,
         'listings': listings
     })
+
+def edit_listing(request, listing_id):
+    listing = get_object_or_404(AuctionListing, id=listing_id)
+
+    # Ensure that the user is the owner of the listing
+    if listing.owner != request.user:
+        return redirect('index')  # Redirect to index if not the owner
+
+    if request.method == 'POST':
+        form = AuctionListingForm(request.POST, request.FILES, instance=listing)
+        if form.is_valid():
+            form.save()
+            return redirect('listing', listing_id=listing.id)
+    else:
+        form = AuctionListingForm(instance=listing)
+
+    return render(request, 'auctions/edit_listing.html', {
+        'form': form,
+        'listing': listing
+    })

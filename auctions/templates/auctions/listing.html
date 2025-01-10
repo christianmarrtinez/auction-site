@@ -119,6 +119,8 @@
         {% csrf_token %}
         <button type="submit" name="close_auction" value="1" class="btn btn-danger">Close Auction</button>
     </form>
+
+    <a href="{% url 'edit_listing' listing.id %}" class="btn btn-warning">Edit Listing</a>
 {% endif %}
 
 <a href="{% url 'index' %}" class="btn btn-primary">Back to Active Listings</a>
