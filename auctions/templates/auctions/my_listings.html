@@ -8,12 +8,11 @@
         {% for listing in listings %}
             <div class="listing">
                 <h3><a href="{% url 'listing' listing.id %}">{{ listing.title }}</a></h3>
-                <p><strong>Description:</strong> {{ listing.description }}</p>
-                <p><strong>Current Price:</strong> ${{ listing.current_price|floatformat:2 }}</p>
-                <p><strong>Category:</strong> {{ listing.category }}</p>
                 {% if listing.image %}
                     <img src="{{ listing.image.url }}" alt="{{ listing.title }}" style="max-width: 200px;">
                 {% endif %}
+                <p><strong>Current Price:</strong> ${{ listing.current_price|floatformat:2 }}</p>
+                <p><strong>Created:</strong> {{ listing.created_at|date:"Y-m-d" }}</p>
                 <a href="{% url 'edit_listing' listing.id %}" class="btn btn-warning">Edit</a>
             </div>
             <hr>

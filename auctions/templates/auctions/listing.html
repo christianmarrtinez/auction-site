@@ -15,7 +15,7 @@
   <img src="{{ listing.image.url }}" alt="{{ listing.title }}" style="max-width: 100%;">
 {% endif %}
 
-
+<p><strong>Listing Owner:</strong> {{ listing.owner.username }}</p>
 <p><strong>Description:</strong> {{ listing.description }}</p>
 <p><strong>Current Price:</strong> ${{ current_price }}</p>
 
@@ -55,6 +55,31 @@
     <p>No bids yet. Be the first to bid!</p>
 {% endif %}
 
+
+<form action="{% url 'toggle_watchlist' listing.id %}" method="post" style="display: inline-block;">
+    {% csrf_token %}
+    <button 
+        type="submit" 
+        name="action" 
+        value="add" 
+        class="btn btn-primary"
+        {% if user.id in listing_watchlist_users %}disabled{% endif %}>
+        Add to Watchlist
+    </button>
+</form>
+
+<form action="{% url 'toggle_watchlist' listing.id %}" method="post" style="display: inline-block; margin-left: 10px;">
+    {% csrf_token %}
+    <button 
+        type="submit" 
+        name="action" 
+        value="remove" 
+        class="btn btn-danger"
+        {% if user.id not in listing_watchlist_users %}disabled{% endif %}>
+        Remove from Watchlist
+    </button>
+</form>
+
 <h3>Comments</h3>
 {% if comments %}
     <ul>
@@ -80,29 +105,6 @@
     <p><a href="{% url 'login' %}">Log in</a> to add a comment.</p>
 {% endif %}
 
-<form action="{% url 'toggle_watchlist' listing.id %}" method="post" style="display: inline-block;">
-    {% csrf_token %}
-    <button 
-        type="submit" 
-        name="action" 
-        value="add" 
-        class="btn btn-primary"
-        {% if user.id in listing_watchlist_users %}disabled{% endif %}>
-        Add to Watchlist
-    </button>
-</form>
-
-<form action="{% url 'toggle_watchlist' listing.id %}" method="post" style="display: inline-block; margin-left: 10px;">
-    {% csrf_token %}
-    <button 
-        type="submit" 
-        name="action" 
-        value="remove" 
-        class="btn btn-danger"
-        {% if user.id not in listing_watchlist_users %}disabled{% endif %}>
-        Remove from Watchlist
-    </button>
-</form>
 
 {% if not listing.is_active %}
     {% if is_user_winner %}
