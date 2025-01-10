@@ -7,12 +7,11 @@
     {% for entry in listings_with_prices %}
         <div class="listing">
             <h3><a href="{% url 'listing' entry.listing.id %}">{{ entry.listing.title }}</a></h3>
-            <p><strong>Description:</strong> {{ entry.listing.description }}</p>
-            <p><strong>Category:</strong> {{ entry.listing.category }}</p>
-            {% if entry.listing.image_url %}
-                <img src="{{ entry.listing.image_url }}" alt="{{ entry.listing.title }}" style="max-width: 200px;">
+            {% if entry.listing.image %}
+                <img src="{{ entry.listing.image.url }}" alt="{{ entry.listing.title }}" style="max-width: 200px;">
             {% endif %}
             <p><strong>Current Price:</strong> ${{ entry.current_price|floatformat:2 }}</p>
+            <p><strong>Created:</strong> {{ entry.listing.created_at|date:"Y-m-d" }}</p>
         </div>
         <hr>
     {% endfor %}

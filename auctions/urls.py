@@ -16,7 +16,4 @@ urlpatterns = [
     path("watchlist/", views.watchlist, name="watchlist"),
     path("watchlist/<int:listing_id>/toggle/", views.toggle_watchlist, name="toggle_watchlist")
 
-]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
