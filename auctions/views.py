@@ -296,3 +296,11 @@ def edit_listing(request, listing_id):
         'form': form,
         'listing': listing
     })
+
+def my_listings(request):
+    # Get all listings where the current user is the owner
+    listings = AuctionListing.objects.filter(owner=request.user)
+
+    return render(request, 'auctions/my_listings.html', {
+        'listings': listings
+    })
